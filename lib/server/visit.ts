@@ -15,6 +15,52 @@ export function getClientIp(h: Headers): string {
   return "";
 }
 
+function parseHintBrand(secChUa: string | undefined): string | null {
+  if (!secChUa) return null;
+  const parts = secChUa.split(",");
+  for (const part of parts) {
+    const m = part.match(/^\s*"([^"]+)"/);
+    if (!m) continue;
+    const brand = m[1];
+    if (/^not/i.test(brand)) continue;
+    const map: Record<string, string> = {
+      "Google Chrome": "Chrome",
+      "Microsoft Edge": "Edge",
+      Chromium: "Chromium",
+      Brave: "Brave",
+      Opera: "Opera",
+      Firefox: "Firefox",
+      Safari: "Safari",
+    };
+    return map[brand] ?? brand;
+  }
+  return null;
+}
+
+function parseHintModel(secChUaModel: string | undefined): string | null {
+  if (!secChUaModel) return null;
+  const m = secChUaModel.match(/^\s*"?([^"]+)"?\s*$/);
+  if (!m || !m[1]) return null;
+  const model = m[1].trim();
+  return model && model !== "0" ? model : null;
+}
+
+function inferVendor(model: string | null | undefined): string | null {
+  if (!model) return null;
+  if (/pixel|nexus/i.test(model)) return "Google";
+  if (/iphone|ipad|ipod|macbook|imac|apple/i.test(model)) return "Apple";
+  if (/galaxy|sm-[a-z0-9]/i.test(model)) return "Samsung";
+  if (/redmi|poco|xiaomi| mi |mi [0-9]/i.test(model)) return "Xiaomi";
+  if (/oneplus/i.test(model)) return "OnePlus";
+  if (/huawei|honor/i.test(model)) return "Huawei";
+  if (/oppo/i.test(model)) return "Oppo";
+  if (/realme/i.test(model)) return "Realme";
+  if (/vivo/i.test(model)) return "Vivo";
+  if (/moto|motorola/i.test(model)) return "Motorola";
+  if (/nokia/i.test(model)) return "Nokia";
+  return null;
+}
+
 export async function createVisit(payload?: Partial<VisitPayload>, userId?: string | null): Promise<string | null> {
   const supabase = getSupabaseAdmin();
   if (!supabase) return null;
@@ -41,6 +87,12 @@ export async function createVisit(payload?: Partial<VisitPayload>, userId?: stri
     if (value) clientHints[key] = value;
   }
 
+  const hintBrand = parseHintBrand(clientHints["sec-ch-ua"]);
+  const hintModel = parseHintModel(clientHints["sec-ch-ua-model"]);
+  const deviceModel = hintModel ?? payload?.uaModel ?? payload?.deviceModel ?? null;
+  const deviceVendor = payload?.deviceVendor || inferVendor(deviceModel) || null;
+  const browserName = hintBrand ?? payload?.browser ?? null;
+
   const row = {
     user_id: userId ?? null,
     ip: ip || null,
@@ -61,13 +113,13 @@ export async function createVisit(payload?: Partial<VisitPayload>, userId?: stri
     currency: geo?.currency ?? null,
     languages: geo?.languages ?? null,
     user_agent: ua || null,
-    browser: payload?.browser ?? null,
+    browser: browserName,
     browser_version: payload?.browserVersion ?? null,
     os: payload?.os ?? null,
     os_version: payload?.osVersion ?? null,
     device_type: payload?.deviceType ?? null,
-    device_vendor: payload?.deviceVendor ?? null,
-    device_model: payload?.deviceModel ?? null,
+    device_vendor: deviceVendor,
+    device_model: deviceModel,
     platform: payload?.platform ?? null,
     screen_width: payload?.screenWidth ?? null,
     screen_height: payload?.screenHeight ?? null,
@@ -95,6 +147,9 @@ export async function createVisit(payload?: Partial<VisitPayload>, userId?: stri
     ua_platform: payload?.uaPlatform ?? null,
     ua_model: payload?.uaModel ?? null,
     ua_full_version: payload?.uaFullVersion ?? null,
+    ua_platform_version: payload?.uaPlatformVersion ?? null,
+    ua_arch: payload?.uaArch ?? null,
+    ua_bitness: payload?.uaBitness ?? null,
     client_hints: Object.keys(clientHints).length > 0 ? clientHints : null,
     raw_client: payload && Object.keys(payload).length > 0 ? (payload as unknown as Record<string, unknown>) : null,
     geo_raw: geo?.raw ?? null,

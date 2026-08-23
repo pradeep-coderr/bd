@@ -37,6 +37,9 @@ export interface ClientMeta {
   uaPlatform?: string;
   uaModel?: string;
   uaFullVersion?: string;
+  uaPlatformVersion?: string;
+  uaArch?: string;
+  uaBitness?: string;
 }
 
 function detectDeviceType(ua: string): string {
@@ -107,10 +110,12 @@ function detectDeviceModel(ua: string): string {
   if (ios) return ios[0].replace(/^\(/, "").trim();
   const android = ua.match(/;\s*([a-z0-9][a-z0-9 _\-.]*)\s+build\//i);
   if (android) return android[1].trim();
+  const pixel = ua.match(/;\s*(pixel[^;)]*)/i);
+  if (pixel) return pixel[1].trim();
   return "";
 }
 
-export function collectClientMeta(): ClientMeta {
+export async function collectClientMeta(): Promise<ClientMeta> {
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
   const nav = typeof navigator !== "undefined" ? navigator : null;
   const conn = nav && "connection" in nav ? (nav as unknown as { connection?: { effectiveType?: string; downlink?: number; rtt?: number; saveData?: boolean } }).connection : undefined;
@@ -125,6 +130,14 @@ export function collectClientMeta(): ClientMeta {
           platform?: string;
           model?: string;
           uaFullVersion?: string;
+          getHighEntropyValues?: (hints: string[]) => Promise<{
+            model?: string;
+            platformVersion?: string;
+            architecture?: string;
+            bitness?: string;
+            uaFullVersion?: string;
+            fullVersionList?: { brand: string; version: string }[];
+          }>;
         };
       }).userAgentData
     : undefined;
@@ -132,6 +145,23 @@ export function collectClientMeta(): ClientMeta {
     typeof screen !== "undefined" && "orientation" in screen
       ? (screen as unknown as { orientation?: { type?: string } }).orientation?.type || ""
       : "";
+
+  let highEntropy: {
+    model?: string;
+    platformVersion?: string;
+    architecture?: string;
+    bitness?: string;
+    uaFullVersion?: string;
+  } | null = null;
+  if (uad?.getHighEntropyValues) {
+    try {
+      highEntropy = await uad.getHighEntropyValues(["model", "platformVersion", "architecture", "bitness", "uaFullVersion"]);
+    } catch {
+      highEntropy = null;
+    }
+  }
+
+  const dntRaw = nav && "doNotTrack" in nav ? (nav as unknown as { doNotTrack?: string | null }).doNotTrack : undefined;
 
   return {
     userAgent: ua,
@@ -160,7 +190,7 @@ export function collectClientMeta(): ClientMeta {
     networkRtt: conn?.rtt,
     networkSaveData: conn?.saveData,
     cookieEnabled: nav?.cookieEnabled ?? false,
-    doNotTrack: nav && "doNotTrack" in nav ? String((nav as unknown as { doNotTrack?: string }).doNotTrack) : undefined,
+    doNotTrack: dntRaw ? String(dntRaw) : undefined,
     referrer: typeof document !== "undefined" ? document.referrer : "",
     online: nav?.onLine ?? false,
     webdriver: nav && "webdriver" in nav ? Boolean((nav as unknown as { webdriver?: boolean }).webdriver) : false,
@@ -168,7 +198,10 @@ export function collectClientMeta(): ClientMeta {
     uaBrands: uad?.brands ? JSON.stringify(uad.brands) : undefined,
     uaMobile: uad?.mobile,
     uaPlatform: uad?.platform,
-    uaModel: uad?.model,
-    uaFullVersion: uad?.uaFullVersion,
+    uaModel: uad?.model || highEntropy?.model || undefined,
+    uaFullVersion: uad?.uaFullVersion || highEntropy?.uaFullVersion || undefined,
+    uaPlatformVersion: highEntropy?.platformVersion || undefined,
+    uaArch: highEntropy?.architecture || undefined,
+    uaBitness: highEntropy?.bitness || undefined,
   };
 }

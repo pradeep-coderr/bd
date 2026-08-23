@@ -55,6 +55,9 @@ export const visitPayloadSchema = z.object({
   uaPlatform: z.string().max(100).optional(),
   uaModel: z.string().max(200).optional(),
   uaFullVersion: z.string().max(100).optional(),
+  uaPlatformVersion: z.string().max(100).optional(),
+  uaArch: z.string().max(50).optional(),
+  uaBitness: z.string().max(20).optional(),
 });
 
 export type VisitPayload = z.infer<typeof visitPayloadSchema>;

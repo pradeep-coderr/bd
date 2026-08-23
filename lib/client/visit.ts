@@ -9,7 +9,7 @@ export async function postVisit(): Promise<string | null> {
     const res = await fetch("/api/visit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(collectClientMeta()),
+      body: JSON.stringify(await collectClientMeta()),
     });
     if (!res.ok) return null;
     const data = await res.json();
