@@ -1,49 +1,1256 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* ============================================================
+     CONFIG — quick-reference for palette / type. Edit hex values
+     here first if you want to retheme; everything below reads
+     from these custom properties.
+     ============================================================ */
+  :root{
+    --bg-deep:      #0d1321;
+    --bg-deep-2:    #1b2238;
+    --gold:         #e8b86d;
+    --gold-soft:    rgba(232,184,109,0.55);
+    --rose:         #e7a1a1;
+    --paper:        #f5ecdf;
+    --paper-ink:    #3a2f28;
+    --ink:          #f3efe6;
+    --ink-dim:      rgba(243,239,230,0.68);
+    --ink-faint:    rgba(243,239,230,0.42);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
-}
 
-html {
-  height: 100%;
-}
+  *{ margin:0; padding:0; box-sizing:border-box; }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
+  html{ scroll-behavior:smooth; }
 
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+  body{
+    background: radial-gradient(ellipse 120% 80% at 50% -10%, var(--bg-deep-2), var(--bg-deep) 60%);
+    color: var(--ink);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    min-height: 100vh;
   }
-}
+
+  /* Locks scrolling entirely until "Start the journey" is clicked.
+     Removed by JS the moment the enter button is pressed.
+     Locks both html and body since mobile browsers vary on which
+     element actually owns the scroll; touch-action/overscroll-behavior
+     stop iOS Safari's elastic bounce from slipping past overflow:hidden. */
+  html.scroll-locked, body.scroll-locked{
+    overflow: hidden;
+    height: 100%;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+  html.scroll-locked{
+    position: fixed;
+    inset: 0;
+    width: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *, *::before, *::after{
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* ---------- shared section scaffolding ---------- */
+  section{
+    min-height: 100svh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    padding: 8vh 6vw;
+  }
+
+  /* ============================================================
+     SECTION 1 — LANDING
+     ============================================================ */
+  #landing{
+    text-align:center;
+    overflow:hidden;
+  }
+
+  /* faint drifting stars, purely decorative, disabled under reduced-motion */
+  .stars{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+  }
+  .star{
+    position:absolute;
+    width: var(--s, 2px);
+    height: var(--s, 2px);
+    border-radius:50%;
+    background: var(--gold-soft);
+    opacity:0;
+    animation: twinkle 6s ease-in-out infinite, drift 40s linear infinite;
+    animation-delay: var(--d, 0s);
+  }
+  @keyframes twinkle{
+    0%, 100%{ opacity:0; }
+    50%{ opacity: var(--o, 0.6); }
+  }
+  @keyframes drift{
+    from{ transform: translateY(0); }
+    to{ transform: translateY(-30px); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .star{ animation: none; opacity: 0.35; }
+  }
+
+  .landing-inner{
+    position:relative;
+    z-index:1;
+    max-width: 34rem;
+  }
+
+  .eyebrow{
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 1.6rem;
+    opacity:0;
+    animation: rise 1.1s var(--ease) forwards;
+    animation-delay: 0.2s;
+  }
+
+  .landing-line{
+    font-family: var(--font-display);
+    font-weight: 500;
+    line-height: 1.25;
+    opacity:0;
+    animation: rise 1.1s var(--ease) forwards;
+  }
+
+  .landing-line.big{
+    font-size: clamp(2.1rem, 7vw, 3.4rem);
+    color: var(--ink);
+    animation-delay: 0.5s;
+  }
+
+  .landing-line.small{
+    font-size: clamp(1.1rem, 3.2vw, 1.4rem);
+    font-style: italic;
+    color: var(--ink-dim);
+    margin-top: 0.9rem;
+    animation-delay: 0.95s;
+  }
+
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(14px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .enter-btn{
+    margin-top: 3.2rem;
+    opacity:0;
+    animation: rise 1.1s var(--ease) forwards;
+    animation-delay: 1.5s;
+
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    letter-spacing: 0.04em;
+    color: var(--bg-deep);
+    background: var(--gold);
+    border: none;
+    padding: 0.95rem 2.4rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+    box-shadow: 0 0 0 0 var(--gold-soft);
+  }
+  .enter-btn:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px -8px var(--gold-soft);
+  }
+  .enter-btn:focus-visible{
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+  .enter-btn:active{ transform: translateY(0); }
+
+  /* landing "dissolve" transition — triggered by JS adding
+     .dissolving to #landing when the enter button is clicked */
+  #landing{
+    transition: opacity 0.9s var(--ease);
+  }
+  #landing.dissolving{
+    opacity: 0;
+    pointer-events: none;
+  }
+  #landing.dissolving .landing-inner{
+    animation: dissolveOut 0.9s var(--ease) forwards;
+  }
+  @keyframes dissolveOut{
+    to{ opacity:0; transform: translateY(-10px) scale(0.97); }
+  }
+  #landing.dissolving .star{
+    animation: burstOut 0.9s var(--ease) forwards !important;
+  }
+  @keyframes burstOut{
+    to{
+      opacity: 0;
+      transform: translate(
+        calc((var(--bx, 0) - 50%) * 0.9),
+        calc((var(--by, 0) - 50%) * 0.9)
+      ) scale(0.4);
+    }
+  }
+  #landing.hidden{ display:none; }
+
+  /* ============================================================
+     SECTION 2 — REVEAL
+     ============================================================ */
+  #reveal{
+    text-align:center;
+    overflow:hidden;
+  }
+  #reveal .reveal-inner{
+    position:relative;
+    z-index:1;
+    max-width: 36rem;
+  }
+
+  .reveal-line{
+    font-family: var(--font-display);
+    font-weight: 500;
+    line-height: 1.3;
+    opacity:0;
+    transform: translateY(16px);
+  }
+  #reveal.active .reveal-line{
+    animation: rise 1.2s var(--ease) forwards;
+  }
+
+  .reveal-line.headline{
+    font-size: clamp(2.4rem, 8vw, 4.2rem);
+    color: var(--ink);
+  }
+  #reveal.active .reveal-line.headline{ animation-delay: 0.5s; }
+
+  .reveal-line.sub{
+    font-size: clamp(1.05rem, 3vw, 1.3rem);
+    color: var(--ink-dim);
+    font-style: italic;
+    margin-top: 1.1rem;
+  }
+  #reveal.active .reveal-line.sub{ animation-delay: 1.05s; }
+
+  .continue-btn{
+    margin-top: 3.4rem;
+    opacity:0;
+    transform: translateY(16px);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-dim);
+    background: transparent;
+    border: 1px solid var(--ink-faint);
+    padding: 0.8rem 2rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform 0.4s var(--ease), border-color 0.4s var(--ease), color 0.4s var(--ease);
+  }
+  #reveal.active .continue-btn{
+    animation: rise 1.2s var(--ease) forwards;
+    animation-delay: 1.6s;
+  }
+  .continue-btn:hover{
+    border-color: var(--gold-soft);
+    color: var(--ink);
+    transform: translateY(-2px);
+  }
+  .continue-btn:focus-visible{
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+
+  /* hearts that gently fall and settle around the reveal line */
+  .hearts{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+  }
+  .heart{
+    position:absolute;
+    top: -8%;
+    font-size: var(--hs, 14px);
+    color: var(--rose);
+    opacity:0;
+  }
+  #reveal.active .heart{
+    animation: heartSettle var(--hd, 3.6s) var(--ease) forwards;
+    animation-delay: var(--hdelay, 0s);
+  }
+  @keyframes heartSettle{
+    0%{ opacity:0; transform: translateY(0) rotate(var(--hr0, -8deg)); }
+    12%{ opacity: var(--ho, 0.55); }
+    85%{ opacity: var(--ho, 0.55); }
+    100%{ opacity:0; transform: translateY(112vh) rotate(var(--hr1, 8deg)); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .heart{ display:none; }
+  }
+
+
+  /* ============================================================
+     SECTION 3 — THE LETTER
+     ============================================================ */
+  #letter{
+    align-items: flex-start;
+    padding-top: 14vh;
+    padding-bottom: 16vh;
+  }
+  #letter .letter-inner{
+    max-width: 34rem;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .letter-eyebrow{
+    text-align:center;
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 3rem;
+  }
+  .letter-salutation{
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.4rem, 4vw, 1.8rem);
+    color: var(--gold);
+    margin-bottom: 2rem;
+  }
+  .letter-para{
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 3vw, 1.4rem);
+    line-height: 1.75;
+    color: var(--ink-dim);
+    margin-bottom: 1.6rem;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 1s var(--ease), transform 1s var(--ease);
+  }
+  .letter-para.in-view{
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .letter-para:last-of-type{ margin-bottom: 0; }
+  .letter-sign{
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.2rem, 3.4vw, 1.5rem);
+    color: var(--gold);
+    margin-top: 2.4rem;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 1s var(--ease), transform 1s var(--ease);
+  }
+  .letter-sign.in-view{
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce){
+    .letter-para, .letter-sign{
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+  /* ============================================================
+     SECTION 4 — OUR MEMORIES
+     Palette flips to warm paper here — a deliberate break from
+     the night sky, since this section is about tangible moments.
+     ============================================================ */
+  #memories{
+    background: var(--paper);
+    color: var(--paper-ink);
+    flex-direction: column;
+    padding-top: 12vh;
+    padding-bottom: 12vh;
+  }
+  #memories .memories-head{
+    text-align:center;
+    margin-bottom: 5vh;
+  }
+  #memories .letter-eyebrow{
+    color: rgba(58,47,40,0.45);
+  }
+  #memories .memories-title{
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    color: var(--paper-ink);
+  }
+
+  .memory-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1.6rem;
+    max-width: 62rem;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .memory-card{
+    background: #fffdf9;
+    border: 1px solid rgba(58,47,40,0.08);
+    border-radius: 6px;
+    padding: 1.8rem 1.6rem;
+    box-shadow: 0 14px 28px -18px rgba(58,47,40,0.35);
+    transform: rotate(var(--tilt, 0deg));
+    opacity: 0;
+    translate: 0 16px;
+    transition: opacity 0.9s var(--ease), translate 0.9s var(--ease);
+  }
+  .memory-card.in-view{
+    opacity: 1;
+    translate: 0 0;
+  }
+  .memory-card:nth-child(1){ --tilt: -1.4deg; }
+  .memory-card:nth-child(2){ --tilt: 0.9deg; }
+  .memory-card:nth-child(3){ --tilt: -0.6deg; }
+  .memory-card:nth-child(4){ --tilt: 1.3deg; }
+  .memory-card:nth-child(5){ --tilt: -1.1deg; }
+  .memory-card:nth-child(6){ --tilt: 0.7deg; }
+
+  .memory-card:hover{
+    transform: rotate(0deg) translateY(-4px);
+    transition: transform 0.35s var(--ease);
+  }
+
+  .memory-card-title{
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.25rem;
+    color: var(--paper-ink);
+    margin-bottom: 0.6rem;
+  }
+  .memory-card-text{
+    font-family: var(--font-body);
+    font-size: 0.94rem;
+    line-height: 1.6;
+    color: rgba(58,47,40,0.75);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .memory-card{
+      opacity: 1 !important;
+      translate: 0 !important;
+      transform: rotate(var(--tilt, 0deg)) !important;
+    }
+  }
+
+  /* ============================================================
+     SECTION 5 — THINGS I LOVE ABOUT YOU
+     Back to the night palette. Flip cards: tap/click rotates
+     each card to reveal its message on the back.
+     ============================================================ */
+  #love{
+    flex-direction: column;
+    padding-top: 12vh;
+    padding-bottom: 12vh;
+  }
+  #love .love-head{
+    text-align:center;
+    margin-bottom: 5vh;
+  }
+  #love .love-title{
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    color: var(--ink);
+  }
+  #love .love-hint{
+    font-size: 0.82rem;
+    color: var(--ink-faint);
+    margin-top: 0.6rem;
+    font-style: italic;
+  }
+
+  .love-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.6rem;
+    max-width: 62rem;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .love-card{
+    background: none;
+    border: none;
+    padding: 0;
+    perspective: 1200px;
+    height: 190px;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+  }
+  .love-card-inner{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.7s var(--ease);
+    transform-style: preserve-3d;
+  }
+  .love-card[aria-pressed="true"] .love-card-inner{
+    transform: rotateY(180deg);
+  }
+  .love-card-face{
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    padding: 1.6rem;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .love-card-front{
+    background: linear-gradient(160deg, rgba(232,184,109,0.10), rgba(232,184,109,0.03));
+    border: 1px solid rgba(232,184,109,0.22);
+  }
+  .love-card-back{
+    background: var(--bg-deep-2);
+    border: 1px solid var(--gold-soft);
+    transform: rotateY(180deg);
+  }
+  .love-card-label{
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.7rem;
+  }
+  .love-card-title{
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.3rem;
+    color: var(--ink);
+  }
+  .love-card-msg{
+    font-family: var(--font-display);
+    font-size: 1.02rem;
+    line-height: 1.55;
+    color: var(--ink-dim);
+  }
+  .love-card:focus-visible .love-card-inner{
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .love-card-inner{ transition: none; }
+  }
+
+  /* ============================================================
+     SECTION 6 — THE DISTANCE
+     Two points connected by a thin pulsing line. Deliberately
+     not a literal map — just two glows and a thread of light.
+     ============================================================ */
+  #distance{
+    flex-direction: column;
+    text-align: center;
+  }
+  #distance .distance-line{
+    font-family: var(--font-display);
+    font-size: clamp(1.3rem, 4vw, 1.9rem);
+    line-height: 1.5;
+    color: var(--ink-dim);
+    max-width: 32rem;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 1.1s var(--ease), transform 1.1s var(--ease);
+  }
+  #distance .distance-line.in-view{
+    opacity: 1;
+    transform: translateY(0);
+  }
+  #distance .distance-line.emphasis{
+    color: var(--gold);
+    font-style: italic;
+    margin-top: 0.4rem;
+  }
+
+  .distance-visual{
+    width: min(80vw, 24rem);
+    margin: 3.2rem auto;
+    opacity: 0;
+    transition: opacity 1.4s var(--ease);
+  }
+  .distance-visual.in-view{ opacity: 1; }
+
+  .distance-dot{
+    fill: var(--gold);
+  }
+  .distance-dot.pulse{
+    animation: dotPulse 2.6s ease-in-out infinite;
+  }
+  @keyframes dotPulse{
+    0%, 100%{ opacity: 1; }
+    50%{ opacity: 0.5; }
+  }
+
+  .distance-thread{
+    stroke: var(--gold-soft);
+    stroke-width: 1;
+    stroke-dasharray: 4 6;
+  }
+
+  .distance-spark{
+    fill: var(--ink);
+    filter: drop-shadow(0 0 4px var(--gold));
+    offset-path: path('M 20 40 H 300');
+    animation: travelSpark 3.4s linear infinite;
+  }
+  @keyframes travelSpark{
+    0%{ offset-distance: 0%; opacity: 0; }
+    8%{ opacity: 1; }
+    92%{ opacity: 1; }
+    100%{ offset-distance: 100%; opacity: 0; }
+  }
+
+  .distance-labels{
+    display:flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 0.6rem;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .distance-dot.pulse{ animation: none; }
+    .distance-spark{ animation: none; opacity: 0; }
+  }
+
+  /* ============================================================
+     SECTION 7 — IF I WERE THERE RIGHT NOW
+     Lines stack up one at a time as she scrolls, staying visible
+     so the whole little story is assembled by the end.
+     ============================================================ */
+  #ifthere{
+    flex-direction: column;
+    text-align: center;
+    padding-top: 14vh;
+    padding-bottom: 14vh;
+  }
+  #ifthere .letter-eyebrow{ margin-bottom: 3.5rem; }
+  .ifthere-list{
+    max-width: 30rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .ifthere-line{
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 3.4vw, 1.55rem);
+    line-height: 1.5;
+    color: var(--ink-dim);
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+  }
+  .ifthere-line.in-view{
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .ifthere-line:first-child{
+    color: var(--ink);
+    font-style: italic;
+  }
+  .ifthere-line:last-child{
+    color: var(--gold);
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ifthere-line{
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  /* ============================================================
+     SECTION 8 — OUR LITTLE CONVERSATION
+     One question at a time. Answers are saved to the database.
+     ============================================================ */
+  #qa{
+    flex-direction: column;
+  }
+  #qa .qa-frame{
+    width: 100%;
+    max-width: 32rem;
+  }
+
+  .qa-progress{
+    display:flex;
+    justify-content:center;
+    gap: 0.5rem;
+    margin-bottom: 3.2rem;
+  }
+  .qa-dot{
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ink-faint);
+    transition: background 0.4s var(--ease), transform 0.4s var(--ease);
+  }
+  .qa-dot.done{ background: var(--gold-soft); }
+  .qa-dot.current{
+    background: var(--gold);
+    transform: scale(1.5);
+  }
+
+  .qa-step{ display:none; text-align:center; }
+  .qa-step.active{
+    display:block;
+    animation: rise 0.7s var(--ease) forwards;
+  }
+
+  .qa-question{
+    font-family: var(--font-display);
+    font-size: clamp(1.3rem, 4vw, 1.7rem);
+    line-height: 1.4;
+    color: var(--ink);
+    margin-bottom: 1.8rem;
+  }
+
+  .qa-input{
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--ink-faint);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    padding: 0.7rem 0.2rem;
+    resize: none;
+    min-height: 3.2rem;
+    line-height: 1.5;
+    transition: border-color 0.3s var(--ease);
+  }
+  .qa-input::placeholder{ color: var(--ink-faint); }
+  .qa-input:focus{
+    outline: none;
+    border-color: var(--gold);
+  }
+  .qa-input.error{
+    border-color: var(--rose);
+  }
+
+  .qa-error{
+    font-size: 0.82rem;
+    color: var(--rose);
+    font-style: italic;
+    margin-top: 0.6rem;
+    text-align: left;
+  }
+
+  .qa-actions{
+    display:flex;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 2.4rem;
+    flex-wrap: wrap;
+  }
+  .qa-btn{
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    letter-spacing: 0.03em;
+    border: none;
+    padding: 0.85rem 2rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform 0.35s var(--ease), opacity 0.35s var(--ease);
+  }
+  .qa-btn.primary{
+    background: var(--gold);
+    color: var(--bg-deep);
+  }
+  .qa-btn.primary:hover{ transform: translateY(-2px); }
+  .qa-btn.ghost{
+    background: transparent;
+    color: var(--ink-faint);
+    border: 1px solid var(--ink-faint);
+  }
+  .qa-btn.ghost:hover{ color: var(--ink); border-color: var(--ink-dim); }
+  .qa-btn:disabled{ opacity: 0.35; cursor: default; transform:none; }
+  .qa-btn:focus-visible{ outline: 2px solid var(--ink); outline-offset: 3px; }
+
+  /* summary screen */
+  .qa-summary-list{
+    text-align: left;
+    display:flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    margin: 2.2rem 0 2.6rem;
+  }
+  .qa-summary-q{
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.35rem;
+  }
+  .qa-summary-a{
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    color: var(--ink-dim);
+    font-style: italic;
+  }
+  .qa-download-link{
+    display:inline-block;
+    margin-top: 1.1rem;
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    text-decoration: underline;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: var(--font-body);
+  }
+  .qa-download-link:hover{ color: var(--ink); }
+
+  /* ============================================================
+     SECTION 9 — HOW ARE YOU FEELING?
+     One open text box — saved to the database on click.
+     ============================================================ */
+  #feeling{
+    flex-direction: column;
+    text-align: center;
+  }
+  #feeling .qa-frame{ max-width: 32rem; width: 100%; }
+  #feeling .feeling-hint{
+    font-size: 0.95rem;
+    color: var(--ink-dim);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+  #feeling .qa-input{
+    min-height: 8rem;
+    text-align: left;
+  }
+  .feeling-saved{
+    margin-top: 1rem;
+    font-size: 0.82rem;
+    color: var(--gold);
+    opacity: 0;
+    transition: opacity 0.4s var(--ease);
+  }
+  .feeling-saved.show{ opacity: 1; }
+  .feeling-saved.error{ color: var(--rose); }
+
+  /* ============================================================
+     SECTION 10 — THINGS I WANT TO DO WITH YOU
+     Checklist-style cards. Tapping toggles a decorative check.
+     ============================================================ */
+  #bucketlist{
+    flex-direction: column;
+    padding-top: 12vh;
+    padding-bottom: 12vh;
+  }
+  #bucketlist .bucket-head{
+    text-align:center;
+    margin-bottom: 5vh;
+  }
+  #bucketlist .bucket-title{
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    color: var(--ink);
+  }
+  #bucketlist .bucket-sub{
+    font-size: 0.9rem;
+    color: var(--ink-faint);
+    margin-top: 0.6rem;
+    font-style: italic;
+  }
+
+  .bucket-list{
+    max-width: 34rem;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .bucket-item{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    text-align: left;
+    background: rgba(232,184,109,0.04);
+    border: 1px solid rgba(232,184,109,0.14);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    transition: background 0.35s var(--ease), border-color 0.35s var(--ease);
+  }
+  .bucket-item:hover{
+    border-color: var(--gold-soft);
+  }
+  .bucket-item[aria-pressed="true"]{
+    background: rgba(232,184,109,0.1);
+    border-color: var(--gold-soft);
+  }
+  .bucket-check{
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink-faint);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 0.8rem;
+    color: transparent;
+    transition: all 0.3s var(--ease);
+  }
+  .bucket-item[aria-pressed="true"] .bucket-check{
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--bg-deep);
+  }
+  .bucket-text{
+    font-family: var(--font-display);
+    font-size: 1.08rem;
+    color: var(--ink-dim);
+    transition: color 0.3s var(--ease);
+  }
+  .bucket-item[aria-pressed="true"] .bucket-text{
+    color: var(--ink);
+  }
+  .bucket-item:focus-visible{
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  /* ============================================================
+     SECTION 11 — FINALE
+     Closing lines fade in automatically in sequence (no tapping
+     needed), then a single "One last thing..." button reveals
+     the final message — the last action she takes on the site.
+     ============================================================ */
+  #finale{
+    flex-direction: column;
+    text-align: center;
+    overflow: hidden;
+  }
+  #finale .finale-inner{
+    position: relative;
+    z-index: 1;
+    max-width: 34rem;
+  }
+  .finale-line{
+    font-family: var(--font-display);
+    font-size: clamp(1.2rem, 3.6vw, 1.6rem);
+    line-height: 1.6;
+    color: var(--ink-dim);
+    opacity: 0;
+    transform: translateY(14px);
+    animation: rise 1.3s var(--ease) forwards;
+  }
+  .finale-line + .finale-line{ margin-top: 1.1rem; }
+  .finale-line.big{
+    font-size: clamp(1.7rem, 5vw, 2.4rem);
+    color: var(--ink);
+  }
+  .finale-line.gold{ color: var(--gold); font-style: italic; }
+
+  /* staggered entrance delays, set individually below */
+  .finale-line:nth-of-type(1){ animation-delay: 0.3s; }
+  .finale-line:nth-of-type(2){ animation-delay: 1.3s; }
+  .finale-line:nth-of-type(3){ animation-delay: 2.5s; }
+  .finale-line:nth-of-type(4){ animation-delay: 3.7s; }
+  .finale-line:nth-of-type(5){ animation-delay: 4.9s; }
+  .finale-line:nth-of-type(6){ animation-delay: 6.1s; }
+
+  .finale-btn{
+    margin-top: 3.4rem;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: rise 1.3s var(--ease) forwards;
+    animation-delay: 7.2s;
+
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    letter-spacing: 0.04em;
+    color: var(--bg-deep);
+    background: var(--gold);
+    border: none;
+    padding: 0.95rem 2.4rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease), opacity 0.5s var(--ease);
+  }
+  .finale-btn:hover{ transform: translateY(-2px); box-shadow: 0 8px 28px -8px var(--gold-soft); }
+  .finale-btn:focus-visible{ outline: 2px solid var(--ink); outline-offset: 3px; }
+  .finale-btn.hidden-away{
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .finale-final-msg{
+    max-width: 30rem;
+    margin: 0 auto;
+    display: none;
+  }
+  .finale-final-msg.show{
+    display: block;
+    animation: rise 1.4s var(--ease) forwards;
+  }
+  .finale-final-msg p{
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    line-height: 1.6;
+    color: var(--gold);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .finale-line, .finale-btn{
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  .stub{
+    color: var(--ink-faint);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+  }
+
+  /* ============================================================
+     COUPLE DIVIDERS — little illustrations between sections
+     ============================================================ */
+  .couple-divider{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 3vh 6vw 6vh;
+    color: var(--gold-soft);
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 1.1s var(--ease), transform 1.1s var(--ease);
+  }
+  .couple-divider.in-view{
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .couple-divider svg{
+    width: min(72vw, 250px);
+    height: auto;
+    overflow: visible;
+  }
+  .couple-divider .float{
+    animation: coupleFloat 5.5s ease-in-out infinite;
+  }
+  @keyframes coupleFloat{
+    0%, 100%{ transform: translateY(0); }
+    50%{ transform: translateY(-7px); }
+  }
+  .couple-divider .acc-rose{ fill: var(--rose); stroke: none; }
+  .couple-divider .acc-gold{ fill: var(--gold); stroke: none; }
+  .couple-divider .acc-line{ fill: none; stroke: currentColor; }
+  .couple-divider .acc-faint{ fill: none; stroke: currentColor; opacity: 0.35; }
+  .couple-divider .acc-gold-soft{ fill: rgba(232,184,109,0.32); stroke: none; }
+  .couple-divider .heart-pulse{
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: heartPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes heartPulse{
+    0%, 100%{ transform: scale(1); }
+    50%{ transform: scale(1.15); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .couple-divider{
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    .couple-divider .float, .couple-divider .heart-pulse{ animation: none; }
+  }
+
+  /* ============================================================
+     LOGIN — the gate before the journey
+     ============================================================ */
+  .login-screen{
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6vh 6vw;
+    position: relative;
+    overflow: hidden;
+  }
+  .login-card{
+    position: relative;
+    z-index: 1;
+    max-width: 24rem;
+    width: 100%;
+    text-align: center;
+  }
+  .login-title{
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.6rem, 9vw, 3.6rem);
+    color: var(--ink);
+    margin-bottom: 1rem;
+  }
+  .login-sub{
+    color: var(--ink-dim);
+    font-size: 0.92rem;
+    line-height: 1.7;
+    margin-bottom: 2.6rem;
+  }
+  .login-form{
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    text-align: left;
+  }
+  .login-btn{
+    margin-top: 0.6rem;
+    width: 100%;
+    animation-delay: 0.8s;
+  }
+
+  /* ============================================================
+     ADMIN — /admin data viewer
+     ============================================================ */
+  .admin-wrap{
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem;
+  }
+  .admin-wrap h1{
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 2rem;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+  }
+  .admin-wrap .admin-sub{
+    color: var(--ink-faint);
+    font-size: 0.85rem;
+    margin-bottom: 2.2rem;
+  }
+  .admin-actions{
+    display:flex;
+    gap: 0.8rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .admin-panel{
+    background: rgba(232,184,109,0.05);
+    border: 1px solid rgba(232,184,109,0.16);
+    border-radius: 12px;
+    padding: 1.6rem;
+    margin-bottom: 2rem;
+  }
+  .admin-panel h2{
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.4rem;
+    color: var(--gold);
+    margin-bottom: 1.2rem;
+  }
+  .admin-table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  .admin-table th{
+    text-align: left;
+    color: var(--ink-faint);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    padding: 0.5rem 0.8rem;
+    border-bottom: 1px solid rgba(232,184,109,0.2);
+  }
+  .admin-table td{
+    padding: 0.6rem 0.8rem;
+    color: var(--ink-dim);
+    border-bottom: 1px solid rgba(232,184,109,0.08);
+    vertical-align: top;
+  }
+  .admin-table tr:hover td{
+    color: var(--ink);
+  }
+  .admin-table .mono{
+    font-family: ui-monospace, monospace;
+    font-size: 0.8rem;
+    word-break: break-all;
+  }
+  .admin-table details summary{
+    cursor: pointer;
+    color: var(--gold-soft);
+    font-size: 0.78rem;
+  }
+  .admin-table details pre{
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-family: ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    margin-top: 0.4rem;
+  }
+  .admin-login{
+    max-width: 22rem;
+    margin: 20vh auto;
+    text-align: center;
+  }
+  .admin-login h1{
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.8rem;
+    margin-bottom: 0.6rem;
+  }
+  .admin-login p{
+    color: var(--ink-faint);
+    font-size: 0.85rem;
+    margin-bottom: 1.8rem;
+  }
+  .admin-login input{
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--ink-faint);
+    border-radius: 999px;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    padding: 0.8rem 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .admin-login input:focus{
+    outline: none;
+    border-color: var(--gold);
+  }
+  .admin-error{
+    color: var(--rose);
+    font-size: 0.82rem;
+    margin-top: 0.8rem;
+    font-style: italic;
+  }
