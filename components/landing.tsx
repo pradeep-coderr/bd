@@ -45,7 +45,7 @@ export default function Landing({ onUnlocked }: { onUnlocked: () => void }) {
         <p className="eyebrow">a little something</p>
         <p className="landing-line big">Hey, Poku</p>
         <p className="landing-line small">I made something for you. Come with me.</p>
-        <button className="enter-btn" id="enterBtn" onClick={handleEnter}>
+        <button type="button" className="enter-btn" id="enterBtn" onClick={handleEnter}>
           Start the journey
         </button>
       </div>

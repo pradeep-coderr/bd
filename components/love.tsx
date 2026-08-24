@@ -38,7 +38,7 @@ const CARDS = [
 function LoveCard({ label, title, msg }: { label: string; title: string; msg: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <button className="love-card" aria-pressed={open} onClick={() => setOpen((v) => !v)}>
+    <button type="button" className="love-card" aria-pressed={open} onClick={() => setOpen((v) => !v)}>
       <div className="love-card-inner">
         <div className="love-card-face love-card-front">
           <p className="love-card-label">{label}</p>

@@ -131,7 +131,7 @@ export default function QA() {
   }, []);
 
   useEffect(() => {
-    if (current !== "summary") {
+    if (current !== "summary" && modalActiveRef.current) {
       inputRefs.current[current]?.focus({ preventScroll: true });
     }
   }, [current]);
@@ -237,6 +237,7 @@ export default function QA() {
                       className={`qa-input ${errorMsg ? "error" : ""}`}
                       rows={2}
                       placeholder="type your answer..."
+                      aria-label={`Your answer: ${q}`}
                       {...field}
                       ref={(el) => {
                         ref(el);

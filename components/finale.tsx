@@ -18,6 +18,7 @@ export default function Finale() {
         <p className="finale-line">I love you.</p>
 
         <button
+          type="button"
           className={`finale-btn ${showFinal ? "hidden-away" : ""}`}
           id="finaleBtn"
           onClick={() => setShowFinal(true)}

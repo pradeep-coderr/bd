@@ -98,6 +98,7 @@ export default function Feeling() {
                 id="feelingInput"
                 rows={4}
                 placeholder="type as much or as little as you want..."
+                aria-label="How are you feeling right now"
                 {...register("text")}
                 disabled={saved === true}
               />

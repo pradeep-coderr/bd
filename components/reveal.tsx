@@ -14,6 +14,7 @@ export default function Reveal({ active }: { active: boolean }) {
           Our first birthday together — and I&apos;m not even there. I&apos;m still finding a way to make it count.
         </p>
         <button
+          type="button"
           className="continue-btn"
           id="continueBtn"
           onClick={() => document.getElementById("letter")?.scrollIntoView({ behavior: "smooth" })}

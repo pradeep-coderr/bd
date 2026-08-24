@@ -75,6 +75,7 @@ export default function LoginForm() {
             className={`qa-input ${errors.email ? "error" : ""}`}
             placeholder="your email"
             autoComplete="email"
+            aria-label="Your email"
             {...register("email")}
           />
           {errors.email && <p className="qa-error">{errors.email.message}</p>}
@@ -85,6 +86,7 @@ export default function LoginForm() {
             className={`qa-input ${errors.password ? "error" : ""}`}
             placeholder="your password"
             autoComplete="current-password"
+            aria-label="Your password"
             {...register("password")}
           />
           {errors.password && <p className="qa-error">{errors.password.message}</p>}

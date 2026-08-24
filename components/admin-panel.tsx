@@ -95,13 +95,13 @@ export default function AdminPanel({ initialData }: { initialData: AdminData }) 
       <p className="admin-sub">every visit, every answer, every feeling — right here.</p>
 
       <div className="admin-actions">
-        <button className="qa-btn primary" onClick={refresh} disabled={loading}>
+        <button type="button" className="qa-btn primary" onClick={refresh} disabled={loading}>
           {loading ? "Refreshing..." : "Refresh"}
         </button>
-        <button className="qa-btn ghost" onClick={downloadBackup}>
+        <button type="button" className="qa-btn ghost" onClick={downloadBackup}>
           Download backup
         </button>
-        <button className="qa-btn ghost" onClick={logout}>
+        <button type="button" className="qa-btn ghost" onClick={logout}>
           Log out
         </button>
       </div>

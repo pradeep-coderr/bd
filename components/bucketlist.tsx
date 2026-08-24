@@ -34,6 +34,7 @@ export default function BucketList() {
       <div className="bucket-list">
         {ITEMS.map((text, i) => (
           <button
+            type="button"
             key={text}
             className="bucket-item"
             aria-pressed={checked.has(i)}
