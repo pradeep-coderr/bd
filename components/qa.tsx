@@ -54,6 +54,8 @@ export default function QA() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const finishedRef = useRef(false);
   const lockedRef = useRef(false);
+  const modalActiveRef = useRef(false);
+  const savedTopRef = useRef<number | null>(null);
 
   const subscribeLock = useCallback((cb: () => void) => {
     window.addEventListener("storage", cb);
@@ -74,12 +76,27 @@ export default function QA() {
   const answers = useWatch({ control, name: "answers" });
 
   const lockScroll = () => {
+    if (modalActiveRef.current) return;
+    const el = sectionRef.current;
+    if (el) {
+      savedTopRef.current = el.offsetTop;
+      el.classList.add("qa-modal");
+    }
+    modalActiveRef.current = true;
     document.documentElement.classList.add("scroll-locked");
     document.body.classList.add("scroll-locked");
   };
   const unlockScroll = () => {
+    const el = sectionRef.current;
     document.documentElement.classList.remove("scroll-locked");
     document.body.classList.remove("scroll-locked");
+    if (el) el.classList.remove("qa-modal");
+    if (modalActiveRef.current) {
+      modalActiveRef.current = false;
+      if (el && savedTopRef.current !== null) {
+        window.scrollTo({ top: savedTopRef.current, behavior: "auto" });
+      }
+    }
   };
 
   useEffect(() => {

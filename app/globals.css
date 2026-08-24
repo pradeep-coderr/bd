@@ -701,6 +701,28 @@
   #qa{
     flex-direction: column;
   }
+  /* Fullscreen focus mode while the conversation is locked.
+     Fixed overlay with internal scrolling so nothing is ever
+     cut off below the fold. */
+  #qa.qa-modal{
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    min-height: 0;
+    height: 100svh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    background: radial-gradient(ellipse 120% 80% at 50% -10%, var(--bg-deep-2), var(--bg-deep) 60%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 8vh 6vw;
+  }
+  #qa.qa-modal .qa-frame{
+    margin: auto 0;
+  }
   #qa .qa-frame{
     width: 100%;
     max-width: 32rem;

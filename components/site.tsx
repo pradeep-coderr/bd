@@ -27,13 +27,23 @@ export default function Site() {
     const blockKeys = new Set(["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Space", " ", "End", "Home"]);
 
     const onWheel = (e: WheelEvent) => {
-      if (isLocked()) e.preventDefault();
+      if (!isLocked()) return;
+      const t = e.target as HTMLElement | null;
+      if (t?.closest?.(".qa-modal")) return;
+      e.preventDefault();
     };
     const onTouch = (e: TouchEvent) => {
-      if (isLocked()) e.preventDefault();
+      if (!isLocked()) return;
+      const t = e.target as HTMLElement | null;
+      if (t?.closest?.(".qa-modal")) return;
+      e.preventDefault();
     };
     const onKey = (e: KeyboardEvent) => {
-      if (isLocked() && blockKeys.has(e.key)) e.preventDefault();
+      if (!isLocked() || !blockKeys.has(e.key)) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "TEXTAREA" || t.tagName === "INPUT" || t.isContentEditable)) return;
+      if (t?.closest?.(".qa-modal")) return;
+      e.preventDefault();
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });
