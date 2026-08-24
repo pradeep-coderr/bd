@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { visitGeoPayloadSchema } from "@/lib/schemas";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { requireUser } from "@/lib/server/auth";
+import { reverseGeocode } from "@/lib/geo";
 
 export async function POST(req: NextRequest) {
   const user = await requireUser();
@@ -49,5 +50,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Visit not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ saved: true });
+  let address: string | null = null;
+  const geocode = await reverseGeocode(parsed.data.latitude, parsed.data.longitude);
+  if (geocode) {
+    address = geocode;
+    await supabase
+      .from("visits")
+      .update({ geo_precise_address: geocode })
+      .eq("id", parsed.data.visitId)
+      .eq("user_id", user.id);
+  }
+
+  return NextResponse.json({ saved: true, address });
 }

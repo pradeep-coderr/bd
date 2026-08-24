@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Landing from "./landing";
 import Reveal from "./reveal";
+import LocationShare from "./location-share";
 import Letter from "./letter";
 import Memories from "./memories";
 import Love from "./love";
@@ -57,6 +58,7 @@ export default function Site() {
     <>
       <Landing onUnlocked={unlock} />
       <Reveal active={revealActive} />
+      <LocationShare />
       <CoupleDivider scene="hold-hands" />
       <Letter />
       <CoupleDivider scene="hug" />

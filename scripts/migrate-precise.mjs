@@ -14,7 +14,8 @@ await client.query(`
   alter table visits
     add column if not exists latitude_precise double precision,
     add column if not exists longitude_precise double precision,
-    add column if not exists accuracy double precision
+    add column if not exists accuracy double precision,
+    add column if not exists geo_precise_address text
 `);
 console.log("precise location columns ready");
 await client.end();

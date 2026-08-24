@@ -18,6 +18,7 @@ create table if not exists visits (
   latitude_precise double precision,
   longitude_precise double precision,
   accuracy double precision,
+  geo_precise_address text,
   timezone text,
   utc_offset text,
   isp text,

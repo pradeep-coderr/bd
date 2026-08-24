@@ -48,6 +48,28 @@ async function fetchJson(url: string): Promise<Record<string, unknown> | null> {
   }
 }
 
+export async function reverseGeocode(latitude: number, longitude: number): Promise<string | null> {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=jsonv2&zoom=16&addressdetails=1&accept-language=en`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": "bd-birthday-site/1.0 (personal gift site)" },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      display_name?: string;
+      address?: { city?: string; state?: string; country?: string };
+    };
+    if (!data || typeof data !== "object") return null;
+    const parts = [data.address?.city, data.address?.state, data.address?.country].filter(Boolean).join(", ");
+    const name = typeof data.display_name === "string" ? data.display_name : parts;
+    if (!name) return null;
+    return name.slice(0, 500);
+  } catch {
+    return null;
+  }
+}
+
 export async function lookupGeo(ip: string): Promise<GeoInfo | null> {
   if (!ip || !isPublicIp(ip)) return { ip };
 

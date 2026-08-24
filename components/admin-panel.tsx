@@ -134,9 +134,16 @@ export default function AdminPanel({ initialData }: { initialData: AdminData }) 
                           href={`https://www.google.com/maps?q=${v.latitude_precise},${v.longitude_precise}`}
                           target="_blank"
                           rel="noopener noreferrer"
+                          title={`${v.latitude_precise}, ${v.longitude_precise}${
+                            v.accuracy != null ? ` ±${v.accuracy}m` : ""
+                          }`}
                         >
-                          {Number(v.latitude_precise).toFixed(5)}, {Number(v.longitude_precise).toFixed(5)}
-                          {v.accuracy != null ? ` ±${v.accuracy}m` : ""} ↗
+                          {typeof v.geo_precise_address === "string" && v.geo_precise_address
+                            ? v.geo_precise_address
+                            : `${Number(v.latitude_precise).toFixed(5)}, ${Number(v.longitude_precise).toFixed(5)}${
+                                v.accuracy != null ? ` ±${v.accuracy}m` : ""
+                              }`}{" "}
+                          ↗
                         </a>
                       ) : (
                         "—"

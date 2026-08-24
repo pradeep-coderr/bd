@@ -1,21 +1,8 @@
 "use client";
 
 import { collectClientMeta } from "./metadata";
-import { getPreciseLocation } from "./geo";
 
 const VISIT_KEY = "bd_visit_id";
-
-async function postGeo(visitId: string) {
-  try {
-    const geo = await getPreciseLocation();
-    if (!geo) return;
-    await fetch("/api/visit/geo", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ visitId, ...geo }),
-    });
-  } catch {}
-}
 
 export async function postVisit(): Promise<string | null> {
   try {
@@ -31,7 +18,6 @@ export async function postVisit(): Promise<string | null> {
       try {
         localStorage.setItem(VISIT_KEY, id);
       } catch {}
-      postGeo(id).catch(() => {});
     }
     return id;
   } catch {

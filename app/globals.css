@@ -1049,6 +1049,39 @@
   }
 
   /* ============================================================
+     LOCATION SHARE — custom consent card
+     ============================================================ */
+  .geo-share{
+    display: flex;
+    justify-content: center;
+    padding: 4vh 6vw 2vh;
+  }
+  .geo-card{
+    max-width: 30rem;
+    width: 100%;
+    text-align: center;
+    background: rgba(232,184,109,0.04);
+    border: 1px solid rgba(232,184,109,0.18);
+    border-radius: 14px;
+    padding: 2rem 1.8rem;
+  }
+  .geo-title{
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.3rem, 4vw, 1.6rem);
+    color: var(--ink);
+    margin-bottom: 0.8rem;
+  }
+  .geo-sub{
+    color: var(--ink-dim);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    margin-bottom: 1.4rem;
+  }
+  .geo-card .qa-actions{ margin-top: 0; }
+  .geo-card .qa-download-link{ margin-top: 0.6rem; }
+
+  /* ============================================================
      COUPLE DIVIDERS — little illustrations between sections
      ============================================================ */
   .couple-divider{
