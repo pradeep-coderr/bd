@@ -41,20 +41,17 @@
   }
 
   /* Locks scrolling entirely until "Start the journey" is clicked.
-     Removed by JS the moment the enter button is pressed.
+     Removed by JS the moment the enter button is pressed. Also reused by
+     the Q&A section to hold scrolling while questions remain.
      Locks both html and body since mobile browsers vary on which
      element actually owns the scroll; touch-action/overscroll-behavior
-     stop iOS Safari's elastic bounce from slipping past overflow:hidden. */
+     stop iOS Safari's elastic bounce from slipping past overflow:hidden.
+     NOTE: no position:fixed / height:100% here — those would reset the
+     scroll offset to the top when the lock engages mid-page (Q&A). */
   html.scroll-locked, body.scroll-locked{
     overflow: hidden;
-    height: 100%;
     overscroll-behavior: none;
     touch-action: none;
-  }
-  html.scroll-locked{
-    position: fixed;
-    inset: 0;
-    width: 100%;
   }
 
   @media (prefers-reduced-motion: reduce){
