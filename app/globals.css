@@ -20,6 +20,16 @@
 
   *{ margin:0; padding:0; box-sizing:border-box; }
 
+  ::selection{ background: rgba(232,184,109,0.35); color: var(--ink); }
+
+  *{ scrollbar-width: thin; scrollbar-color: rgba(232,184,109,0.35) transparent; }
+  ::-webkit-scrollbar{ width: 9px; }
+  ::-webkit-scrollbar-track{ background: transparent; }
+  ::-webkit-scrollbar-thumb{ background: rgba(232,184,109,0.3); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover{ background: rgba(232,184,109,0.5); }
+
+  :focus-visible{ outline: 2px solid var(--gold); outline-offset: 2px; }
+
   html{ scroll-behavior:smooth; }
 
   body{
@@ -260,8 +270,12 @@
     transition: transform 0.4s var(--ease), border-color 0.4s var(--ease), color 0.4s var(--ease);
   }
   #reveal.active .continue-btn{
-    animation: rise 1.2s var(--ease) forwards;
-    animation-delay: 1.6s;
+    animation: rise 1.2s var(--ease) forwards, glowPulse 3.2s ease-in-out 3s infinite;
+    animation-delay: 1.6s, 3s;
+  }
+  @keyframes glowPulse{
+    0%, 100%{ box-shadow: 0 0 0 0 rgba(232,184,109,0); }
+    50%{ box-shadow: 0 0 22px 2px rgba(232,184,109,0.28); }
   }
   .continue-btn:hover{
     border-color: var(--gold-soft);
@@ -834,6 +848,76 @@
     line-height: 1.6;
   }
 
+  .qa-counter{
+    font-size: 0.72rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.9rem;
+  }
+
+  .qa-char-count{
+    text-align: right;
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    margin-top: 0.45rem;
+  }
+
+  /* ============================================================
+     JOURNEY UI — scroll progress + back to top
+     ============================================================ */
+  .journey-progress{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    z-index: 60;
+    pointer-events: none;
+  }
+  .journey-progress-fill{
+    position: relative;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(232,184,109,0.35), var(--gold));
+    transition: width 0.25s linear;
+  }
+  .journey-progress-heart{
+    position: absolute;
+    right: -9px;
+    top: -7px;
+    font-size: 13px;
+    filter: drop-shadow(0 0 5px rgba(232,184,109,0.8));
+  }
+
+  .back-to-top{
+    position: fixed;
+    right: 1.2rem;
+    bottom: 1.2rem;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 1px solid var(--gold-soft);
+    background: rgba(13,19,33,0.72);
+    color: var(--gold);
+    font-size: 1.15rem;
+    cursor: pointer;
+    z-index: 60;
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+    transition: opacity 0.4s var(--ease), transform 0.4s var(--ease), background 0.3s var(--ease), color 0.3s var(--ease);
+    backdrop-filter: blur(6px);
+  }
+  .back-to-top.show{
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .back-to-top:hover{
+    background: var(--gold);
+    color: var(--bg-deep);
+  }
+
   /* ============================================================
      SECTION 9 — HOW ARE YOU FEELING?
      One open text box — saved to the database on click.
@@ -1137,6 +1221,12 @@
     flex-direction: column;
     gap: 1.6rem;
     text-align: left;
+  }
+  .login-footer{
+    margin-top: 2.4rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
   }
   .login-btn{
     margin-top: 0.6rem;

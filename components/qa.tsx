@@ -194,6 +194,9 @@ export default function QA() {
           </div>
         ) : (
           <>
+            <p className="qa-counter">
+              question {current === "summary" ? QUESTIONS.length : current + 1} of {QUESTIONS.length}
+            </p>
             <div className="qa-progress" id="qaProgress">
               {QUESTIONS.map((_, i) => (
                 <span

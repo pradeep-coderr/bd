@@ -14,6 +14,7 @@ import Feeling from "./feeling";
 import BucketList from "./bucketlist";
 import Finale from "./finale";
 import CoupleDivider from "./couple-art";
+import { ScrollProgress, BackToTop } from "./journey-ui";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function Site() {
@@ -55,6 +56,8 @@ export default function Site() {
 
   return (
     <>
+      {revealActive && <ScrollProgress />}
+      {revealActive && <BackToTop />}
       <Landing onUnlocked={unlock} />
       <Reveal active={revealActive} />
       <CoupleDivider scene="hold-hands" />

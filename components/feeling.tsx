@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState, useSyncExternalStore } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ensureVisitId } from "@/lib/client/visit";
@@ -19,11 +19,14 @@ export default function Feeling() {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<FeelingFormValues>({
     resolver: zodResolver(feelingFormSchema),
     defaultValues: { text: "" },
   });
+
+  const text = useWatch({ control, name: "text" });
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<null | boolean>(null);
@@ -98,7 +101,8 @@ export default function Feeling() {
                 {...register("text")}
                 disabled={saved === true}
               />
-              {errors.text && <p className="qa-error">{errors.text.message}</p>}
+                {errors.text && <p className="qa-error">{errors.text.message}</p>}
+                <p className="qa-char-count">{(text ?? "").length}/2000</p>
               <div className="qa-actions">
                 <button type="submit" className="qa-btn primary" id="feelingSaveBtn" disabled={saving || saved === true}>
                   {saving ? "Saving..." : saved === true ? "Saved ❤️" : "Save what I wrote"}

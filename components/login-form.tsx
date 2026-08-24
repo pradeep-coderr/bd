@@ -96,6 +96,7 @@ export default function LoginForm() {
 
         {authError && <p className="qa-error" style={{ textAlign: "center" }}>{authError}</p>}
       </form>
+      <p className="login-footer">made with ❤️ — for one person only</p>
     </div>
   );
 }

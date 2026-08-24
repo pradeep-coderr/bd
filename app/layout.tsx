@@ -20,6 +20,10 @@ export const metadata: Metadata = {
   description: "a little something",
 };
 
+export const viewport = {
+  themeColor: "#0d1321",
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`scroll-locked ${cormorant.variable} ${workSans.variable}`}>

@@ -60,14 +60,6 @@ export const visitPayloadSchema = z.object({
   uaBitness: z.string().max(20).optional(),
 });
 
-export const visitGeoPayloadSchema = z.object({
-  visitId: z.string().uuid(),
-  latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180),
-  accuracy: z.number().nonnegative().max(1000000).optional(),
-});
-
 export type VisitPayload = z.infer<typeof visitPayloadSchema>;
 export type AnswersPayload = z.infer<typeof answersPayloadSchema>;
 export type FeelingPayload = z.infer<typeof feelingPayloadSchema>;
-export type VisitGeoPayload = z.infer<typeof visitGeoPayloadSchema>;

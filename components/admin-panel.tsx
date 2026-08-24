@@ -18,7 +18,6 @@ const VISIT_FIELDS: { key: string; label: string }[] = [
   { key: "device_type", label: "Device" },
   { key: "browser", label: "Browser" },
   { key: "os", label: "OS" },
-  { key: "exact", label: "Exact location" },
 ];
 
 function fmt(value: unknown): string {
@@ -125,32 +124,7 @@ export default function AdminPanel({ initialData }: { initialData: AdminData }) 
               <tr key={v.id as string}>
                 {VISIT_FIELDS.map((f) => (
                   <td key={f.key} className="mono">
-                    {f.key === "created_at" ? (
-                      fmtDate(v[f.key] as string)
-                    ) : f.key === "exact" ? (
-                      v.latitude_precise != null && v.longitude_precise != null ? (
-                        <a
-                          className="admin-map-link"
-                          href={`https://www.google.com/maps?q=${v.latitude_precise},${v.longitude_precise}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title={`${v.latitude_precise}, ${v.longitude_precise}${
-                            v.accuracy != null ? ` ±${v.accuracy}m` : ""
-                          }`}
-                        >
-                          {typeof v.geo_precise_address === "string" && v.geo_precise_address
-                            ? v.geo_precise_address
-                            : `${Number(v.latitude_precise).toFixed(5)}, ${Number(v.longitude_precise).toFixed(5)}${
-                                v.accuracy != null ? ` ±${v.accuracy}m` : ""
-                              }`}{" "}
-                          ↗
-                        </a>
-                      ) : (
-                        "—"
-                      )
-                    ) : (
-                      fmt(v[f.key])
-                    )}
+                    {f.key === "created_at" ? fmtDate(v[f.key] as string) : fmt(v[f.key])}
                   </td>
                 ))}
                 <td>
