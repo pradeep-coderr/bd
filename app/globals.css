@@ -1208,6 +1208,13 @@
   .admin-table tr:hover td{
     color: var(--ink);
   }
+  .admin-map-link{
+    color: var(--gold);
+    text-decoration: none;
+  }
+  .admin-map-link:hover{
+    text-decoration: underline;
+  }
   .admin-table .mono{
     font-family: ui-monospace, monospace;
     font-size: 0.8rem;
