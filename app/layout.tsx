@@ -22,8 +22,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${workSans.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className={`scroll-locked ${cormorant.variable} ${workSans.variable}`}>
+      <body className="scroll-locked">{children}</body>
     </html>
   );
 }
