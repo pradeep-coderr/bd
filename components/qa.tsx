@@ -53,6 +53,7 @@ export default function QA() {
   const inputRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
   const sectionRef = useRef<HTMLElement | null>(null);
   const finishedRef = useRef(false);
+  const lockedRef = useRef(false);
 
   const subscribeLock = useCallback((cb: () => void) => {
     window.addEventListener("storage", cb);
@@ -82,6 +83,11 @@ export default function QA() {
   };
 
   useEffect(() => {
+    lockedRef.current = locked;
+    if (locked) unlockScroll();
+  }, [locked]);
+
+  useEffect(() => {
     const finished = current === "summary";
     finishedRef.current = finished;
     if (finished) unlockScroll();
@@ -94,7 +100,7 @@ export default function QA() {
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !finishedRef.current) lockScroll();
+          if (entry.isIntersecting && !finishedRef.current && !lockedRef.current) lockScroll();
         });
       },
       { threshold: 0.5 }

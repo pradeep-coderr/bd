@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Stars from "./stars";
 import { postVisit } from "@/lib/client/visit";
 
@@ -8,6 +8,15 @@ export default function Landing({ onUnlocked }: { onUnlocked: () => void }) {
   const [dissolving, setDissolving] = useState(false);
   const [hidden, setHidden] = useState(false);
   const fired = useRef(false);
+
+  useEffect(() => {
+    document.documentElement.classList.add("scroll-locked");
+    document.body.classList.add("scroll-locked");
+    return () => {
+      document.documentElement.classList.remove("scroll-locked");
+      document.body.classList.remove("scroll-locked");
+    };
+  }, []);
 
   const finishTransition = useCallback(() => {
     setHidden(true);
