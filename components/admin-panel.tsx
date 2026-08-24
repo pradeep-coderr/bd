@@ -71,6 +71,25 @@ export default function AdminPanel({ initialData }: { initialData: AdminData }) 
     router.refresh();
   };
 
+  const downloadBackup = async () => {
+    try {
+      const res = await fetch("/api/admin/data", { cache: "no-store" });
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      const json = await res.json();
+      const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `bd-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Backup failed");
+    }
+  };
+
   return (
     <div className="admin-wrap">
       <h1>the little database</h1>
@@ -79,6 +98,9 @@ export default function AdminPanel({ initialData }: { initialData: AdminData }) 
       <div className="admin-actions">
         <button className="qa-btn primary" onClick={refresh} disabled={loading}>
           {loading ? "Refreshing..." : "Refresh"}
+        </button>
+        <button className="qa-btn ghost" onClick={downloadBackup}>
+          Download backup
         </button>
         <button className="qa-btn ghost" onClick={logout}>
           Log out
