@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Landing from "./landing";
 import Reveal from "./reveal";
 import Letter from "./letter";
@@ -13,8 +14,10 @@ import Feeling from "./feeling";
 import BucketList from "./bucketlist";
 import Finale from "./finale";
 import CoupleDivider from "./couple-art";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function Site() {
+  const router = useRouter();
   const [revealActive, setRevealActive] = useState(false);
 
   useEffect(() => {
@@ -72,6 +75,19 @@ export default function Site() {
       <BucketList />
       <CoupleDivider scene="sunset-bench" />
       <Finale />
+      <div className="signout-wrap">
+        <button
+          type="button"
+          className="qa-download-link"
+          onClick={async () => {
+            await createSupabaseBrowserClient().auth.signOut();
+            router.replace("/login");
+            router.refresh();
+          }}
+        >
+          sign out
+        </button>
+      </div>
     </>
   );
 }

@@ -1135,10 +1135,18 @@
     animation-delay: 0.8s;
   }
 
+  .signout-wrap{
+    text-align: center;
+    padding: 0 0 10vh;
+  }
+  .signout-wrap .qa-download-link{
+    font-size: 0.75rem;
+    opacity: 0.6;
+  }
+
   /* ============================================================
      ADMIN — /admin data viewer
-     ============================================================ */
-  .admin-wrap{
+     ============================================================ */  .admin-wrap{
     max-width: 72rem;
     margin: 0 auto;
     padding: 3rem 1.5rem 6rem;
@@ -1167,6 +1175,7 @@
     border-radius: 12px;
     padding: 1.6rem;
     margin-bottom: 2rem;
+    overflow-x: auto;
   }
   .admin-panel h2{
     font-family: var(--font-display);

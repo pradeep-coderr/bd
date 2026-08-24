@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -40,6 +40,11 @@ export default function AdminPanel({ initialData }: { initialData: AdminData }) 
   const [data, setData] = useState<AdminData>(initialData);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.classList.remove("scroll-locked");
+    document.body.classList.remove("scroll-locked");
+  }, []);
 
   const refresh = async () => {
     setLoading(true);
