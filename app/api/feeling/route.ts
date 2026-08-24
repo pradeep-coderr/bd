@@ -35,6 +35,17 @@ export async function POST(req: NextRequest) {
     visitId = await createVisit(undefined, user.id);
   }
 
+  if (visitId) {
+    const { data: existing } = await supabase
+      .from("feelings")
+      .select("id")
+      .eq("visit_id", visitId)
+      .limit(1);
+    if (existing && existing.length > 0) {
+      return NextResponse.json({ error: "Feeling already saved for this visit" }, { status: 409 });
+    }
+  }
+
   const { error } = await supabase.from("feelings").insert({
     visit_id: visitId,
     text: parsed.data.text,

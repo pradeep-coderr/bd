@@ -35,6 +35,17 @@ export async function POST(req: NextRequest) {
     visitId = await createVisit(undefined, user.id);
   }
 
+  if (visitId) {
+    const { data: existing } = await supabase
+      .from("answers")
+      .select("id")
+      .eq("visit_id", visitId)
+      .limit(1);
+    if (existing && existing.length > 0) {
+      return NextResponse.json({ error: "Answers already saved for this visit" }, { status: 409 });
+    }
+  }
+
   const rows = parsed.data.answers.map((a) => ({
     visit_id: visitId,
     question: a.question,

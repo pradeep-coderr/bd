@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -17,6 +17,8 @@ const QUESTIONS = [
   "What's one thing about us you never want to change?",
   "What's a tiny everyday moment you're most looking forward to sharing with me someday?",
 ];
+
+const QA_LOCK_KEY = "bd_qa_saved";
 
 const qaFormSchema = z.object({
   answers: z
@@ -49,8 +51,61 @@ export default function QA() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<null | boolean>(null);
   const inputRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const finishedRef = useRef(false);
+
+  const subscribeLock = useCallback((cb: () => void) => {
+    window.addEventListener("storage", cb);
+    return () => window.removeEventListener("storage", cb);
+  }, []);
+  const locked = useSyncExternalStore(
+    subscribeLock,
+    () => {
+      try {
+        return localStorage.getItem(QA_LOCK_KEY) === "1";
+      } catch {
+        return false;
+      }
+    },
+    () => false
+  );
 
   const answers = useWatch({ control, name: "answers" });
+
+  const lockScroll = () => {
+    document.documentElement.classList.add("scroll-locked");
+    document.body.classList.add("scroll-locked");
+  };
+  const unlockScroll = () => {
+    document.documentElement.classList.remove("scroll-locked");
+    document.body.classList.remove("scroll-locked");
+  };
+
+  useEffect(() => {
+    const finished = current === "summary";
+    finishedRef.current = finished;
+    if (finished) unlockScroll();
+  }, [current]);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !finishedRef.current) lockScroll();
+        });
+      },
+      { threshold: 0.5 }
+    );
+    io.observe(el);
+
+    return () => {
+      io.disconnect();
+      unlockScroll();
+    };
+  }, []);
 
   useEffect(() => {
     if (current !== "summary") {
@@ -82,8 +137,18 @@ export default function QA() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ visitId, answers: values.answers }),
       });
+      if (res.status === 409) {
+        setSaved(true);
+        try {
+          localStorage.setItem(QA_LOCK_KEY, "1");
+        } catch {}
+        return;
+      }
       if (!res.ok) throw new Error("save failed");
       setSaved(true);
+      try {
+        localStorage.setItem(QA_LOCK_KEY, "1");
+      } catch {}
     } catch {
       setSaved(false);
     } finally {
@@ -109,93 +174,116 @@ export default function QA() {
   const hasErrors = Object.keys(errors.answers ?? {}).length > 0;
 
   return (
-    <section id="qa">
+    <section id="qa" ref={sectionRef}>
       <div className="qa-frame">
         <p className="letter-eyebrow" style={{ textAlign: "center" }}>
           a little conversation
         </p>
-        <div className="qa-progress" id="qaProgress">
-          {QUESTIONS.map((_, i) => (
-            <span
-              key={i}
-              className={`qa-dot ${current === "summary" || i < (current as number) ? "done" : ""} ${
-                current === i ? "current" : ""
-              }`}
-            />
-          ))}
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {QUESTIONS.map((q, i) => {
-            const { ref, ...field } = register(`answers.${i}.answer`);
-            const errorMsg = errors.answers?.[i]?.answer?.message;
-            const filled = (answers[i]?.answer ?? "").trim().length > 0;
-            return (
-              <div key={q} className={`qa-step ${current === i ? "active" : ""}`} data-index={i}>
-                <p className="qa-question">{q}</p>
-                <textarea
-                  className={`qa-input ${errorMsg ? "error" : ""}`}
-                  rows={2}
-                  placeholder="type your answer..."
-                  {...field}
-                  ref={(el) => {
-                    ref(el);
-                    inputRefs.current[i] = el;
-                  }}
-                />
-                {errorMsg && <p className="qa-error">{errorMsg}</p>}
-                <div className="qa-actions">
-                  {i > 0 && (
-                    <button type="button" className="qa-btn ghost" onClick={() => handleBack(i)}>
-                      Back
-                    </button>
-                  )}
-                  <button type="button" className="qa-btn primary" onClick={() => handleNext(i)} disabled={!filled}>
-                    {i === QUESTIONS.length - 1 ? "See it all ❤️" : "Next ❤️"}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-
-          <div className={`qa-step ${current === "summary" ? "active" : ""}`} id="qaSummaryStep">
+        {locked ? (
+          <div className="qa-step active">
             <p className="qa-question">Our little conversation</p>
-            <div className="qa-summary-list" id="qaSummaryList">
-              {answers.map((a) => (
-                <div key={a.question}>
-                  <p className="qa-summary-q">{a.question}</p>
-                  <p className="qa-summary-a">{a.answer || "no answer yet"}</p>
-                </div>
+            <p className="qa-locked-note">
+              You already shared your answers with me — they&apos;re final and safe ❤️
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="qa-progress" id="qaProgress">
+              {QUESTIONS.map((_, i) => (
+                <span
+                  key={i}
+                  className={`qa-dot ${current === "summary" || i < (current as number) ? "done" : ""} ${
+                    current === i ? "current" : ""
+                  }`}
+                />
               ))}
             </div>
-            <div className="qa-actions">
-              <button
-                type="button"
-                className="qa-btn ghost"
-                onClick={() => setCurrent(QUESTIONS.length - 1)}
-              >
-                Edit
-              </button>
-              <button type="submit" className="qa-btn primary" id="qaDownloadBtn" disabled={saving}>
-                {saving ? "Saving..." : "Save our answers"}
-              </button>
-            </div>
-            {hasErrors && (
-              <p className="qa-error" style={{ textAlign: "center" }}>
-                Some answers are empty — tap Edit to go back and fill them in.
-              </p>
-            )}
-            {saved === true && <p className="feeling-saved show">saved ❤️</p>}
-            {saved === false && (
-              <p className="qa-error" style={{ textAlign: "center" }}>
-                Couldn&apos;t save right now — try again, or download a copy below.
-              </p>
-            )}
-            <button type="button" className="qa-download-link" onClick={downloadAnswers}>
-              download a copy for yourself
-            </button>
-          </div>
-        </form>
+
+            <form onSubmit={handleSubmit(onSubmit)}>
+              {QUESTIONS.map((q, i) => {
+                const { ref, ...field } = register(`answers.${i}.answer`);
+                const errorMsg = errors.answers?.[i]?.answer?.message;
+                const filled = (answers[i]?.answer ?? "").trim().length > 0;
+                return (
+                  <div key={q} className={`qa-step ${current === i ? "active" : ""}`} data-index={i}>
+                    <p className="qa-question">{q}</p>
+                    <textarea
+                      className={`qa-input ${errorMsg ? "error" : ""}`}
+                      rows={2}
+                      placeholder="type your answer..."
+                      {...field}
+                      ref={(el) => {
+                        ref(el);
+                        inputRefs.current[i] = el;
+                      }}
+                    />
+                    {errorMsg && <p className="qa-error">{errorMsg}</p>}
+                    <div className="qa-actions">
+                      {i > 0 && (
+                        <button type="button" className="qa-btn ghost" onClick={() => handleBack(i)}>
+                          Back
+                        </button>
+                      )}
+                      <button type="button" className="qa-btn primary" onClick={() => handleNext(i)} disabled={!filled}>
+                        {i === QUESTIONS.length - 1 ? "See it all ❤️" : "Next ❤️"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+
+              <div className={`qa-step ${current === "summary" ? "active" : ""}`} id="qaSummaryStep">
+                <p className="qa-question">Our little conversation</p>
+                <div className="qa-summary-list" id="qaSummaryList">
+                  {answers.map((a) => (
+                    <div key={a.question}>
+                      <p className="qa-summary-q">{a.question}</p>
+                      <p className="qa-summary-a">{a.answer || "no answer yet"}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="qa-actions">
+                  {saved !== true && (
+                    <button
+                      type="button"
+                      className="qa-btn ghost"
+                      onClick={() => {
+                        lockScroll();
+                        setCurrent(QUESTIONS.length - 1);
+                      }}
+                    >
+                      Edit
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="qa-btn primary"
+                    id="qaDownloadBtn"
+                    disabled={saving || saved === true}
+                  >
+                    {saving ? "Saving..." : saved === true ? "Saved ❤️" : "Save our answers"}
+                  </button>
+                </div>
+                {saved === true && (
+                  <p className="qa-locked-note">this is final now — your words are safe with me ❤️</p>
+                )}
+                {hasErrors && (
+                  <p className="qa-error" style={{ textAlign: "center" }}>
+                    Some answers are empty — tap Edit to go back and fill them in.
+                  </p>
+                )}
+                {saved === false && (
+                  <p className="qa-error" style={{ textAlign: "center" }}>
+                    Couldn&apos;t save right now — try again, or download a copy below.
+                  </p>
+                )}
+                <button type="button" className="qa-download-link" onClick={downloadAnswers}>
+                  download a copy for yourself
+                </button>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </section>
   );

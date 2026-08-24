@@ -825,6 +825,15 @@
   }
   .qa-download-link:hover{ color: var(--ink); }
 
+  .qa-locked-note{
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--gold);
+    margin-top: 1rem;
+    line-height: 1.6;
+  }
+
   /* ============================================================
      SECTION 9 — HOW ARE YOU FEELING?
      One open text box — saved to the database on click.
